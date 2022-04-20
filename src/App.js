@@ -125,7 +125,7 @@ function App() {
           ...prevState[columnId],
           items: [
             ...prevState[columnId].items.map((element, idx) =>
-              idx === index ? { ...element, content: editInput } : element
+              idx == index ? { ...element, content: editInput } : element
             ),
           ],
         },
@@ -142,8 +142,11 @@ function App() {
 
   const deleteTodo = (itemId) => {
     const getColumnId = () => {
+      console.log("line 110", columns);
       for (let columnId in columns) {
         for (let [index, item] of Object.entries(columns[columnId].items)) {
+          console.log("itemId", itemId);
+          console.log("item.id", item.id);
           if (item.id === itemId) {
             return [columnId, columns[columnId].name, index];
           }
@@ -153,22 +156,13 @@ function App() {
 
     const [columnId, columnName, index] = getColumnId();
 
-    setItems(() => items.filter((item, idx) => idx !== index));
+    setItems(items.filter((item, idx) => idx !== index));
     setColumns((prevState) => {
-      console.log("items", items);
-      const something = [
-        ...prevState[columnId].items.filter((element, idx) => {
-          console.log("idx", idx, "index", index);
-          return idx !== index;
-        }),
-      ];
-      console.log("o que??", something);
-      console.log("index", index, typeof index);
       return {
         ...prevState,
         [columnId]: {
           ...prevState[columnId],
-          items: [...prevState[columnId].items.filter((item, idx) => idx !== index)],
+          items: [...prevState[columnId].items.filter((item, idx) => idx != index)],
         },
       };
     });
