@@ -142,11 +142,8 @@ function App() {
 
   const deleteTodo = (itemId) => {
     const getColumnId = () => {
-      console.log("line 110", columns);
       for (let columnId in columns) {
         for (let [index, item] of Object.entries(columns[columnId].items)) {
-          console.log("itemId", itemId);
-          console.log("item.id", item.id);
           if (item.id === itemId) {
             return [columnId, columns[columnId].name, index];
           }
