@@ -76,38 +76,103 @@ function App() {
   const addTodo = (e) => {
     e.preventDefault();
     setItems((prevState) => [...prevState, { id: uuid(), content: addInput }]);
+
+    const getId = () => {
+      for (let id in columns) {
+        if (columns[id].name === "Requested") return id;
+      }
+    };
+    const id = getId();
+
+    setColumns((prevState) => {
+      return {
+        ...prevState,
+        [id]: {
+          name: "Requested",
+          items: [...prevState[id].items, { id: uuid(), content: addInput }],
+        },
+      };
+    });
+
+    setAddInput("");
   };
 
   const showEdit = (id) => {
     setShowEditInput((prevState) => ({ ...prevState, [id]: !prevState[id] }));
   };
 
-  const editTodo = (id) => {
-    console.log("hi", id);
+  const editTodo = (itemId) => {
     const updatedItems = items.map((item) =>
-      item.id === id ? { id: item.id, content: editInput } : { ...item }
+      item.id === itemId ? { id: item.id, content: editInput } : { ...item }
     );
     setItems(updatedItems);
-    setShowEditInput((prevState) => ({ ...prevState, [id]: false }));
+
+    const getColumnId = () => {
+      for (let columnId in columns) {
+        for (let [index, item] of Object.entries(columns[columnId].items)) {
+          if (item.id === itemId) {
+            return [columnId, columns[columnId].name, index];
+          }
+        }
+      }
+    };
+    const [columnId, columnName, index] = getColumnId();
+
+    setColumns((prevState) => {
+      return {
+        ...prevState,
+        [columnId]: {
+          ...prevState[columnId],
+          items: [
+            ...prevState[columnId].items.map((element, idx) =>
+              idx === index ? { ...element, content: editInput } : element
+            ),
+          ],
+        },
+      };
+    });
+    setShowEditInput((prevState) => ({ ...prevState, [itemId]: false }));
     setEditInput("");
-    // setItems((prevState) => [...prevState, { id: id, content: editInput }]);
   };
 
-  React.useEffect(() => {
-    const getId = () => {
-      for (let id in columns) {
-        if (columns[id].name === "Requested") return id;
+  const remove = (obj, prop) => {
+    let { [prop]: omit, ...res } = obj;
+    return res;
+  };
+
+  const deleteTodo = (itemId) => {
+    const getColumnId = () => {
+      for (let columnId in columns) {
+        for (let [index, item] of Object.entries(columns[columnId].items)) {
+          if (item.id === itemId) {
+            return [columnId, columns[columnId].name, index];
+          }
+        }
       }
     };
 
-    setColumns((prevState) => ({
-      ...prevState,
-      [getId()]: {
-        name: "Requested",
-        items: items,
-      },
-    }));
-  }, [items]);
+    const [columnId, columnName, index] = getColumnId();
+
+    setItems(() => items.filter((item, idx) => idx !== index));
+    setColumns((prevState) => {
+      console.log("items", items);
+      const something = [
+        ...prevState[columnId].items.filter((element, idx) => {
+          console.log("idx", idx, "index", index);
+          return idx !== index;
+        }),
+      ];
+      console.log("o que??", something);
+      console.log("index", index, typeof index);
+      return {
+        ...prevState,
+        [columnId]: {
+          ...prevState[columnId],
+          items: [...prevState[columnId].items.filter((item, idx) => idx !== index)],
+        },
+      };
+    });
+  };
 
   return (
     <div>
@@ -184,6 +249,7 @@ function App() {
                                       ) : (
                                         item.content
                                       )}
+                                      <div onClick={() => deleteTodo(item.id)}>X</div>
                                     </div>
                                   );
                                 }}
